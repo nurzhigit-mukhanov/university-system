@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+debug.log
+
+# Environment
+.env
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/

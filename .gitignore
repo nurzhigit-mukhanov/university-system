@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+
+# Logs
+logs/
+*.log
+debug.log
+
+# Environment variables
+**/.env
+
+# Build output
+frontend/build/
+frontend/dist/
+backend/dist/
+
+# Cache
+frontend/.cache/
+
+# Runtime data
+backend/pids/
+*.pid
+*.seed
+*.pid.lock
