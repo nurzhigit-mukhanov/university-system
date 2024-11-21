@@ -1,4 +1,4 @@
-import { Router, Response, NextFunction } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User";
 import Course from "../models/Course";
@@ -84,6 +84,37 @@ router.get(
       res.status(200).json(users);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
+    }
+  }
+);
+
+// Route to update a user
+router.put(
+  "/users/:id",
+  authenticateJWT,
+  adminMiddleware,
+  async (
+    req: Request<{ id: string }, {}, { name: string; role: string }>,
+    res: Response
+  ): Promise<any> => {
+    try {
+      const { id: userId } = req.params;
+      const { name, role } = req.body;
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { name, role },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to update user" });
     }
   }
 );
