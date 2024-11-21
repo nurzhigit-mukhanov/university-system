@@ -51,10 +51,16 @@ router.get(
     try {
       const courseId = req.params.id;
 
+      // Populate the students field
       const course = await Course.findById(courseId).populate(
         "students",
-        "name"
+        "name email"
       );
+      if (!course) {
+        res.status(404).json({ message: "Course not found" });
+        return;
+      }
+
       res.status(200).json(course);
     } catch (error) {
       next(error); // Pass errors to the default error handler

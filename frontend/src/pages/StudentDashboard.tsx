@@ -189,6 +189,9 @@ const StudentDashboard: React.FC = () => {
             <option value="201">201</option>
             <option value="202">202</option>
             <option value="203">203</option>
+            <option value="204">204</option>
+            <option value="205">205</option>
+            <option value="206">206</option>
           </select>
         </div>
         <div className="mt-6">

@@ -15,6 +15,13 @@ router.post(
       const studentId = req.user!.id;
       const { courseId, timetable } = req.body;
 
+      // Add the student to the course's students array
+      await Course.findByIdAndUpdate(
+        courseId,
+        { $addToSet: { students: studentId } }, // Avoid duplicate entries
+        { new: true }
+      );
+
       // Additional validation: Ensure timetable is an array and contains valid entries
       if (!Array.isArray(timetable) || timetable.length === 0) {
         return res.status(400).json({ message: "Invalid timetable format" });
