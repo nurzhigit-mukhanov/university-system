@@ -10,12 +10,10 @@ debug.log
 **/.env
 
 # Build output
-frontend/build/
-frontend/dist/
 backend/dist/
 
 # Cache
-frontend/.cache/
+
 
 # Runtime data
 backend/pids/
