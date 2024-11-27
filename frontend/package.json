@@ -10,6 +10,7 @@
     "@types/node": "^16.18.119",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
@@ -18,9 +19,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "build:css": "postcss src/index.css -o dist/styles.css"
   },
@@ -43,9 +44,12 @@
     ]
   },
   "devDependencies": {
+    "@types/jwt-decode": "^2.2.1",
     "autoprefixer": "^10.4.20",
+    "customize-cra": "^1.0.0",
     "postcss": "^8.4.49",
     "postcss-cli": "^11.0.0",
+    "react-app-rewired": "^2.2.1",
     "tailwindcss": "^3.4.15"
   }
 }

@@ -5,23 +5,28 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import StudentDashboard from "./pages/StudentDashboard";
-import TeacherDashboard from "./pages/TeacherDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import { getUserFromToken } from "./utils/auth";
-import "./index.css";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import StudentDashboard from "../pages/StudentDashboard";
+import TeacherDashboard from "../pages/TeacherDashboard";
+import AdminDashboard from "../pages/AdminDashboard";
+import { getUserFromToken } from "../utils/auth";
+import "../index.css";
 
+// Типизация пропсов для ProtectedRoute
+interface ProtectedRouteProps {
+  role: string;
+  children: JSX.Element;
+}
+
+// Основной компонент приложения
 const App: React.FC = () => {
   const user = getUserFromToken();
 
-  const ProtectedRoute = ({
+  // ProtectedRoute для защиты маршрутов
+  const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     role,
     children,
-  }: {
-    role: string;
-    children: JSX.Element;
   }) => {
     if (!user) return <Navigate to="/login" />;
     if (user.role !== role) return <Navigate to="/" />;

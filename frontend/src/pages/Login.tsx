@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import API from "../utils/api";
+import API from "@utils/api";
 
-const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+interface LoginForm {
+  email: string;
+  password: string;
+}
+
+const Login: React.FC = () => {
+  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
+  const [error, setError] = useState<string>("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,21 +19,22 @@ const Login = () => {
     try {
       const { data } = await API.post("/auth/login", form);
 
-      // Store the token in localStorage
       localStorage.setItem("token", data.token);
 
-      // Redirect based on role
-      if (data.role === "admin") {
-        window.location.href = "/admin";
-      } else if (data.role === "teacher") {
-        window.location.href = "/teacher";
-      } else if (data.role === "student") {
-        window.location.href = "/student";
-      } else {
-        window.location.href = "/"; // Default fallback
+      switch (data.role) {
+        case "admin":
+          window.location.href = "/admin";
+          break;
+        case "teacher":
+          window.location.href = "/teacher";
+          break;
+        case "student":
+          window.location.href = "/student";
+          break;
+        default:
+          window.location.href = "/";
       }
     } catch (err: any) {
-      console.error("Error:", err);
       setError(err.response?.data?.message || "An unknown error occurred");
     }
   };

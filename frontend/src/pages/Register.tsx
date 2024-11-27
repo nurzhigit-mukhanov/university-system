@@ -1,14 +1,22 @@
 import React, { useState } from "react";
-import API from "../utils/api";
+import API from "@utils/api";
 
-const Register = () => {
-  const [form, setForm] = useState({
+// Типизация формы регистрации
+interface RegisterForm {
+  name: string;
+  email: string;
+  password: string;
+  role: "student" | "teacher" | "admin";
+}
+
+const Register: React.FC = () => {
+  const [form, setForm] = useState<RegisterForm>({
     name: "",
     email: "",
     password: "",
     role: "student",
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -22,7 +30,7 @@ const Register = () => {
       await API.post("/auth/register", form);
       window.location.href = "/login";
     } catch (err: any) {
-      setError(err.response.data.message);
+      setError(err.response?.data?.message || "An unknown error occurred");
     }
   };
 
@@ -37,6 +45,7 @@ const Register = () => {
             <input
               type="text"
               name="name"
+              value={form.name}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
             />
@@ -46,6 +55,7 @@ const Register = () => {
             <input
               type="email"
               name="email"
+              value={form.email}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
             />
@@ -55,6 +65,7 @@ const Register = () => {
             <input
               type="password"
               name="password"
+              value={form.password}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
             />
@@ -63,6 +74,7 @@ const Register = () => {
             <label className="block text-sm font-medium">Role</label>
             <select
               name="role"
+              value={form.role}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded"
             >

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import API from "../utils/api";
+import Navbar from "@components/Navbar";
+import API from "@utils/api";
 
 interface User {
   _id: string;
@@ -11,14 +11,13 @@ interface User {
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [newName, setNewName] = useState("");
-  const [newRole, setNewRole] = useState("");
+  const [newName, setNewName] = useState<string>("");
+  const [newRole, setNewRole] = useState<string>("");
 
-  // Fetch users from the API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const { data } = await API.get("/admin/users");
+        const { data } = await API.get<User[]>("/admin/users");
         setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -28,21 +27,18 @@ const AdminDashboard: React.FC = () => {
     fetchUsers();
   }, []);
 
-  // Handle edit button click
   const startEditing = (user: User) => {
     setEditingUser(user);
     setNewName(user.name);
     setNewRole(user.role);
   };
 
-  // Handle cancel button click
   const cancelEditing = () => {
     setEditingUser(null);
     setNewName("");
     setNewRole("");
   };
 
-  // Handle save button click
   const saveChanges = async () => {
     if (!editingUser) return;
 
@@ -50,7 +46,6 @@ const AdminDashboard: React.FC = () => {
       const updatedUser = { name: newName, role: newRole };
       await API.put(`/admin/users/${editingUser._id}`, updatedUser);
 
-      // Update user list locally
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user._id === editingUser._id
@@ -59,7 +54,7 @@ const AdminDashboard: React.FC = () => {
         )
       );
 
-      cancelEditing(); // Reset editing state
+      cancelEditing();
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -83,7 +78,6 @@ const AdminDashboard: React.FC = () => {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     className="border rounded px-2 py-1"
-                    placeholder="Enter name"
                   />
                   <select
                     value={newRole}

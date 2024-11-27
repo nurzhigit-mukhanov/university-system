@@ -1,10 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { logout, getUserFromToken } from "../utils/auth";
+import { logout, getUserFromToken, User } from "@utils/auth";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const user = getUserFromToken();
+  const user: User | null = getUserFromToken();
 
   const handleLogout = () => {
     logout();
