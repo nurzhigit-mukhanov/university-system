@@ -1,9 +1,22 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../utils/api";
 
-const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+// Типы для формы и ответа
+interface LoginForm {
+  email: string;
+  password: string;
+}
+
+interface LoginResponse {
+  token: string;
+  role: "student" | "teacher" | "admin";
+}
+
+const Login: React.FC = () => {
+  const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -12,23 +25,26 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await API.post("/auth/login", form);
+      const { data } = await API.post<LoginResponse>("/auth/login", form);
 
-      // Store the token in localStorage
+      // Сохраняем токен в localStorage
       localStorage.setItem("token", data.token);
 
-      // Redirect based on role
-      if (data.role === "admin") {
-        window.location.href = "/admin";
-      } else if (data.role === "teacher") {
-        window.location.href = "/teacher";
-      } else if (data.role === "student") {
-        window.location.href = "/student";
-      } else {
-        window.location.href = "/"; // Default fallback
+      // Перенаправление в зависимости от роли
+      switch (data.role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "teacher":
+          navigate("/teacher");
+          break;
+        case "student":
+          navigate("/student");
+          break;
+        default:
+          navigate("/");
       }
     } catch (err: any) {
-      console.error("Error:", err);
       setError(err.response?.data?.message || "An unknown error occurred");
     }
   };

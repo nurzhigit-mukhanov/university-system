@@ -1,30 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import API from "../utils/api";
-
-interface Course {
-  _id: string;
-  name: string;
-  description: string;
-  teacherId: string;
-  classroom: string;
-  time: string;
-  weekday: string;
-  group: string;
-}
-
-interface TimetableEntry {
-  _id: string;
-  courseId: Course;
-  name: string;
-  description: string;
-  time: string;
-  classroom: string;
-  day: string;
-  startTime?: string; // Optional fields if derived on the frontend
-  endTime?: string;
-  teacherName?: string; // Add the teacherName property
-}
+import {
+  fetchCoursesByGroup,
+  registerCourse,
+  dropCourse,
+  Course,
+} from "../api/courseApi";
+import { fetchTimetable, TimetableEntry } from "../api/timetableApi";
 
 const StudentDashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -40,94 +22,53 @@ const StudentDashboard: React.FC = () => {
     { label: "17:30-18:20", start: "17:30", end: "18:20" },
   ];
 
-  const fetchTimetable = async () => {
-    try {
-      const { data } = await API.get<TimetableEntry[]>("/student/timetable");
-      setTimetable(
-        data.map((entry) => ({
-          ...entry,
-          startTime: entry.startTime || "00:00", // Ensure a default fallback
-          endTime: entry.endTime || "23:59", // Ensure a default fallback
-          classroom: entry.courseId.classroom || "N/A", // Default to "N/A" if classroom is undefined
-          teacherName: entry.courseId.teacherId || "Unknown", // Set teacher name
-          description: entry.courseId.description || "", // Set description
-        }))
-      );
-      console.log("Fetched Timetable:", data); // Log the fetched timetable data
-    } catch (error) {
-      console.error("Failed to fetch timetable:", error);
-    }
-  };
-
-  const fetchCoursesByGroup = async (group: string) => {
-    try {
-      const { data } = await API.get(`/student/courses?group=${group}`);
-      setCourses(data);
-    } catch (error) {
-      console.error("Failed to fetch courses:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchTimetable();
-    fetchCoursesByGroup(selectedGroup);
+    const loadTimetable = async () => {
+      const data = await fetchTimetable();
+      setTimetable(data);
+    };
+
+    const loadCourses = async () => {
+      const data = await fetchCoursesByGroup(selectedGroup);
+      setCourses(data);
+    };
+
+    loadTimetable();
+    loadCourses();
   }, [selectedGroup]);
 
   const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedGroup(e.target.value);
   };
 
-  const registerCourse = async (courseId: string) => {
+  const handleRegister = async (courseId: string) => {
     try {
-      const selectedCourse = courses.find((course) => course._id === courseId);
+      const course = courses.find((c) => c._id === courseId);
+      if (!course) return;
 
-      if (!selectedCourse) {
-        alert("Course not found");
-        return;
-      }
-
-      // Assuming selectedCourse.time is in the format "HH:MM-HH:MM"
-      const [startTime, endTime] = selectedCourse.time.split("-");
-      const timetableEntry = {
-        day: selectedCourse.weekday,
-        startTime: startTime,
-        endTime: endTime,
-        classroom: selectedCourse.classroom,
-        name: selectedCourse.name,
-        description: selectedCourse.description,
-        teacherName: selectedCourse.teacherId,
-      };
-
-      await API.post("/student/register", {
-        courseId,
-        timetable: [timetableEntry], // Send the timetable as an object
-      });
-
-      alert("Course registered successfully!");
-      setCourses((prevCourses) =>
-        prevCourses.filter((course) => course._id !== courseId)
-      );
-      fetchTimetable();
+      const [startTime, endTime] = course.time.split("-");
+      await registerCourse(courseId, [
+        { day: course.weekday, startTime, endTime },
+      ]);
+      alert("Course registered successfully");
+      setCourses((prev) => prev.filter((c) => c._id !== courseId));
+      const updatedTimetable = await fetchTimetable();
+      setTimetable(updatedTimetable);
     } catch (error) {
-      console.error("Failed to register course:", error);
+      console.error("Error registering course:", error);
     }
   };
 
-  const dropCourse = async (courseId: string) => {
+  const handleDrop = async (courseId: string) => {
     try {
-      console.log("Dropping course with ID:", courseId); // Debug log
-      const response = await API.delete(`/student/drop/${courseId}`);
-
-      if (response.status === 200) {
-        alert("Course dropped successfully");
-        fetchTimetable(); // Refresh the timetable
-        fetchCoursesByGroup(selectedGroup); // Refresh the courses
-      } else {
-        alert(`Failed to drop course: ${response.statusText}`);
-      }
+      await dropCourse(courseId);
+      alert("Course dropped successfully");
+      const updatedTimetable = await fetchTimetable();
+      const updatedCourses = await fetchCoursesByGroup(selectedGroup); // Refresh the courses
+      setCourses(updatedCourses);
+      setTimetable(updatedTimetable);
     } catch (error) {
-      console.error("Failed to drop course:", error);
-      alert("Failed to drop course. Check console for details.");
+      console.error("Error dropping course:", error);
     }
   };
 
@@ -150,17 +91,13 @@ const StudentDashboard: React.FC = () => {
       return (
         <div className="p-2 bg-blue-200 text-center rounded">
           {matchingCourses.map((course, index) => (
-            <div key={index} className="relative">
-              <strong>{course.name}:</strong>
-              {course.description}
-              <br />
-              <span>Teacher: {"Unknown"}</span>
+            <div key={index}>
+              <strong>{course.name}:</strong> {course.description}
               <br />
               <span>Classroom: {course.classroom}</span>
-              {/* Cross button */}
               <button
-                onClick={() => dropCourse(course.courseId._id)}
-                className="absolute top-1 right-1 text-red-600 font-bold"
+                onClick={() => handleDrop(course.courseId._id)}
+                className="text-red-600 font-bold"
                 title="Drop Course"
               >
                 ×
@@ -207,7 +144,7 @@ const StudentDashboard: React.FC = () => {
                 </span>
                 <button
                   className="bg-blue-500 text-white px-3 py-1 rounded"
-                  onClick={() => registerCourse(course._id)}
+                  onClick={() => handleRegister(course._id)}
                 >
                   Register
                 </button>
