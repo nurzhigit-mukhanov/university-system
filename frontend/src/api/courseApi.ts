@@ -23,6 +23,10 @@ export const registerCourse = async (
   courseId: string,
   timetable: { day: string; startTime: string; endTime: string }[]
 ): Promise<void> => {
+  if (!timetable || timetable.length === 0) {
+    throw new Error("Timetable is empty");
+  }
+  console.log("Sending request data:", { courseId, timetable });
   await API.post("/student/register", { courseId, timetable });
 };
 

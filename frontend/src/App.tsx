@@ -5,10 +5,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/Login/Login";
 import Register from "./pages/Register";
-import StudentDashboard from "./pages/StudentDashboard";
-import TeacherDashboard from "./pages/TeacherDashboard";
+import StudentDashboard from "./pages/StudentDashboard/StudentDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 import { getUserFromToken } from "./utils/auth";
 import "./index.css";

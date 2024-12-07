@@ -11,35 +11,26 @@ interface User {
 interface AdminStore {
   users: User[];
   editingUser: User | null;
-  newName: string;
-  newRole: string;
   setUsers: (users: User[]) => void;
   startEditing: (user: User) => void;
   cancelEditing: () => void;
   updateUserLocally: (userId: string, updatedFields: Partial<User>) => void;
-  setNewName: (name: string) => void;
-  setNewRole: (role: string) => void;
   fetchUsers: () => Promise<void>;
-  saveChanges: () => Promise<void>;
+  saveChanges: (name: string, role: string) => Promise<void>; // Форма передаёт данные
 }
 
 export const useAdminStore = create<AdminStore>((set, get) => ({
   users: [],
   editingUser: null,
-  newName: "",
-  newRole: "",
   setUsers: (users: User[]) => set({ users }),
-  startEditing: (user: User) =>
-    set({ editingUser: user, newName: user.name, newRole: user.role }),
-  cancelEditing: () => set({ editingUser: null, newName: "", newRole: "" }),
+  startEditing: (user: User) => set({ editingUser: user }),
+  cancelEditing: () => set({ editingUser: null }),
   updateUserLocally: (userId: string, updatedFields: Partial<User>) =>
     set((state) => ({
       users: state.users.map((user) =>
         user._id === userId ? { ...user, ...updatedFields } : user
       ),
     })),
-  setNewName: (name: string) => set({ newName: name }),
-  setNewRole: (role: string) => set({ newRole: role }),
   fetchUsers: async () => {
     try {
       const { data } = await API.get<User[]>("/admin/users");
@@ -48,13 +39,12 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       console.error("Error fetching users:", error);
     }
   },
-  saveChanges: async () => {
-    const { editingUser, newName, newRole, cancelEditing, updateUserLocally } =
-      get();
+  saveChanges: async (name: string, role: string) => {
+    const { editingUser, updateUserLocally, cancelEditing } = get();
     if (!editingUser) return;
 
     try {
-      const updatedUser = { name: newName, role: newRole }; // Поля _id нет
+      const updatedUser = { name, role };
       await API.put(`/admin/users/${editingUser._id}`, updatedUser);
       updateUserLocally(editingUser._id, updatedUser);
       cancelEditing();
